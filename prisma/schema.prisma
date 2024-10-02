@@ -125,6 +125,8 @@ model Order {
 
   OrderItem    OrderItem[]
   OrderAddress OrderAddress?
+
+  transactionId String?
 }
 
 model OrderItem {
@@ -150,7 +152,6 @@ model OrderAddress {
   postalCode String
   city       String
   phone      String
-  rememberAddress Boolean? 
 
   // Relaciones
   country   Country @relation(fields: [countryId], references: [id])

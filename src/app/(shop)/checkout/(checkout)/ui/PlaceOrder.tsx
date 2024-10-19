@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -31,32 +30,49 @@ export const PlaceOrder = () => {
   }, []);
 
 
-  const onPlaceOrder = async() => {
+  const onPlaceOrder = async () => {
     setIsPlacingOrder(true);
-    // await sleep(2);
-
-    const productsToOrder = cart.map( product => ({
+    
+    // Verifica que la dirección esté completa usando las propiedades existentes
+    if (!address.firstName || !address.lastName || !address.address || !address.city || !address.postalCode || !address.country) {
+      setErrorMessage("Por favor completa todos los campos de la dirección.");
+      setIsPlacingOrder(false);
+      return;
+    }
+    
+    const productsToOrder = cart.map(product => ({
       productId: product.id,
       quantity: product.quantity,
       size: product.size,
-    }))
-
-
-    //! Server Action
-    const resp = await placeOrder( productsToOrder, address);
-    if ( !resp.ok ) {
+    }));
+    
+    // Prepara la dirección sin campos no válidos
+    const { firstName, lastName, address: addr, address2, postalCode, city, country, phone } = address;
+    
+    const addressData = {
+      firstName,
+      lastName,
+      address: addr,
+      address2,
+      postalCode,
+      city,
+      country, // Asegúrate de que este campo está permitido
+      phone,
+      // No incluyas userId ni rememberAddress aquí, ya que no son válidos
+    };
+  
+    // Aquí solo se pasan las propiedades existentes en address
+    const resp = await placeOrder(productsToOrder, addressData);
+    if (!resp.ok) {
       setIsPlacingOrder(false);
       setErrorMessage(resp.message);
       return;
     }
-
-    //* Todo salio bien!
+    
     clearCart();
-    router.replace('/orders/' + resp.order?.id );
-
-
-  }
-
+    router.replace('/orders/' + resp.order?.id);
+  };
+  
 
 
 

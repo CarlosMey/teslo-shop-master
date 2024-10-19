@@ -65,7 +65,7 @@ export const placeOrder = async (
       const updatedProductsPromises = products.map((product) => {
         //  Acumular los valores
         const productQuantity = productIds
-          .filter((p) => p.productId === product.id) 
+          .filter((p) => p.productId === product.id)
           .reduce((acc, item) => item.quantity + acc, 0);
 
         if (productQuantity === 0) {
@@ -126,7 +126,6 @@ export const placeOrder = async (
           ...restAddress,
           countryId: country,
           orderId: order.id,
-          rememberAddress: true, 
         },
       });
 

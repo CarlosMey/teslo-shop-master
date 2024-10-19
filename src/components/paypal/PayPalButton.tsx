@@ -29,44 +29,85 @@ export const PayPalButton = ({ orderId, amount }: Props) => {
   }
 
 
-  const createOrder = async(data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
+  // const createOrder = async(data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
 
+  //   const transactionId = await actions.order.create({
+  //     purchase_units: [
+  //       {
+  //         invoice_id: orderId,
+  //         amount: {
+  //           value: `${ rountedAmount }`,
+  //         }
+
+  //       }
+  //     ]
+  //   });
+
+  //   const { ok } = await setTransactionId( orderId, transactionId );
+  //   if ( !ok ) {
+  //     throw new Error('No se pudo actualizar la orden');
+  //   }
+
+  //   return transactionId;
+  // }
+
+
+
+  const createOrder = async (data: CreateOrderData, actions: CreateOrderActions): Promise<string> => {
     const transactionId = await actions.order.create({
+      intent: 'CAPTURE', // O 'AUTHORIZE', dependiendo de tu necesidad
       purchase_units: [
         {
           invoice_id: orderId,
           amount: {
-            value: `${ rountedAmount }`,
-          }
-
-        }
-      ]
+            currency_code: 'USD',  // O la moneda que prefieras usar
+            value: `${rountedAmount}`,
+          },
+        },
+      ],
     });
-
-    const { ok } = await setTransactionId( orderId, transactionId );
-    if ( !ok ) {
+  
+    const { ok } = await setTransactionId(orderId, transactionId);
+    if (!ok) {
       throw new Error('No se pudo actualizar la orden');
     }
-
+  
     return transactionId;
-  }
+  };
 
-  const onApprove = async(data: OnApproveData, actions: OnApproveActions) => {
-    
+
+
+
+  const onApprove = async (data: OnApproveData, actions: OnApproveActions) => {
     const details = await actions.order?.capture();
-    if ( !details ) return;
+    if (!details) return;
+  
+    if (details.id) {
+      await paypalCheckPayment(details.id);
+    } else {
+      throw new Error('No se encontró el ID de la transacción');
+    }
+  };
+  
 
-    await paypalCheckPayment( details.id );
+  // const onApprove = async(data: OnApproveData, actions: OnApproveActions) => {
+    
+  //   const details = await actions.order?.capture();
+  //   if ( !details ) return;
 
-  }
+  //   await paypalCheckPayment( details.id );
+
+  // }
 
 
 
 
   return (
-    <PayPalButtons 
-      createOrder={ createOrder }
-      onApprove={ onApprove }
-    />
+    <div className="relative z-0">
+      <PayPalButtons 
+        createOrder={ createOrder }
+        onApprove={ onApprove }
+      />
+    </div>
   )
 }

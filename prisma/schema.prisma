@@ -152,7 +152,8 @@ model OrderAddress {
   postalCode String
   city       String
   phone      String
-
+  rememberAddress Boolean @default(false)
+  
   // Relaciones
   country   Country @relation(fields: [countryId], references: [id])
   countryId String
